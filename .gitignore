@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Datasets
+
+lenet/data/
+
 # Distribution / packaging
 .Python
 build/
