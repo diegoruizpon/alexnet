@@ -93,10 +93,10 @@ class yolo(nn.Module):
                                kernel_size=(3,3),
                                )
         
-        self.conv5_4 = nn.Conv2d(in_channels=512,
+        self.conv5_4 = nn.Conv2d(in_channels=1024,
                                out_channels=1024,
-                               kernel_size=(3,3),
-                               stride = (2,2)
+                               kernel_size=3,
+                               stride = 2
                                )
         
         # Conv 6 
@@ -124,9 +124,40 @@ class yolo(nn.Module):
         
         
     def forward(self, x): 
-        
+        # Conv 1
         x = self.maxpool(self.leakyRELU(self.conv1(x)))
         
+        #Conv 2
+        x = self.maxpool(self.leakyRELU(self.conv2(x)))
+        
+        # Conv 3
+        x = self.leakyRELU(self.conv3_1(x))
+        x = self.leakyRELU(self.conv3_2(x))
+        x = self.leakyRELU(self.conv3_3(x))
+        x = self.leakyRELU(self.conv3_4(x))
+        x = self.maxpool(x)
+        
+        # Conv 4
+        for _ in range(4):
+            x = self.leakyRELU(self.conv4_1(x))
+            x = self.leakyRELU(self.conv4_2(x))
+            
+        x = self.leakyRELU(self.conv4_3(x))
+        x = self.leakyRELU(self.conv4_4(x))
+        x = self.maxpool(x)
+        
+        # Conv 5
+        for _ in range(2):
+            x = self.leakyRELU(self.conv5_1(x))
+            x = self.leakyRELU(self.conv5_2(x))
+            
+        x = self.leakyRELU(self.conv5_3(x))
+        # x = self.leakyRELU(self.conv5_4(x))
+        
+        # # Conv 6
+        
+        # x = self.leakyRELU(self.conv6_1(x))
+        # x = self.leakyRELU(self.conv6_2(x))
         
         return x
         
