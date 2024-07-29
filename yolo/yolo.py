@@ -14,11 +14,13 @@ class yolo(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=3,
                                out_channels=64,
                                kernel_size=7,
-                               stride = 2)
+                               stride = 2,
+                               padding=3)
         
         self.conv2 = nn.Conv2d(in_channels=64,
                                out_channels=192,
                                kernel_size=(3,3),
+                               padding=1
                                )
         
         # Conv 3
@@ -31,6 +33,7 @@ class yolo(nn.Module):
         self.conv3_2 = nn.Conv2d(in_channels=128,
                                out_channels=256,
                                kernel_size=(3,3),
+                               padding=1
                                )
         
         self.conv3_3 = nn.Conv2d(in_channels=256,
@@ -41,6 +44,7 @@ class yolo(nn.Module):
         self.conv3_4 = nn.Conv2d(in_channels=256,
                                out_channels=512,
                                kernel_size=(3,3),
+                               padding=1
                                )
         
         
@@ -55,6 +59,7 @@ class yolo(nn.Module):
         self.conv4_2 = nn.Conv2d(in_channels=256,
                                out_channels=512,
                                kernel_size=(3,3),
+                               padding=1
                                )
         
         ## Conv 4.2
@@ -67,7 +72,8 @@ class yolo(nn.Module):
         
         self.conv4_4 = nn.Conv2d(in_channels=512,
                                out_channels=1024,
-                               kernel_size=(3,3)
+                               kernel_size=(3,3),
+                               padding=1
                                )
         
         
@@ -83,6 +89,7 @@ class yolo(nn.Module):
         self.conv5_2 = nn.Conv2d(in_channels=512,
                                out_channels=1024,
                                kernel_size=(3,3),
+                               padding=1
                                )
         
         # conv 5.2
@@ -91,12 +98,14 @@ class yolo(nn.Module):
         self.conv5_3 = nn.Conv2d(in_channels=1024,
                                out_channels=1024,
                                kernel_size=(3,3),
+                               padding=1
                                )
         
         self.conv5_4 = nn.Conv2d(in_channels=1024,
                                out_channels=1024,
                                kernel_size=3,
-                               stride = 2
+                               stride = 2,
+                               padding=1
                                )
         
         # Conv 6 
@@ -104,19 +113,22 @@ class yolo(nn.Module):
         self.conv6_1 = nn.Conv2d(in_channels=1024,
                                out_channels=1024,
                                kernel_size=(3,3),
+                               padding=1
                                )
         self.conv6_2 = nn.Conv2d(in_channels=1024,
                                out_channels=1024,
                                kernel_size=(3,3),
+                               padding=1
                                )
         
         
         ## Linear layers
         
-        self.linear1 = nn.Linear(in_features=1024, out_features=4096)
+        self.linear1 = nn.Linear(in_features=1024*7*7, out_features=4096)
         
         
-        self.linear2 = nn.Linear(in_features=4096, out_features=30)
+        self.linear2 = nn.Linear(in_features=4096, out_features=30*7*7)
+
         
         self.maxpool = nn.MaxPool2d(kernel_size=2,
                                     stride = 2)
@@ -152,19 +164,28 @@ class yolo(nn.Module):
             x = self.leakyRELU(self.conv5_2(x))
             
         x = self.leakyRELU(self.conv5_3(x))
-        # x = self.leakyRELU(self.conv5_4(x))
+        x = self.leakyRELU(self.conv5_4(x))
         
-        # # Conv 6
+        # Conv 6
         
-        # x = self.leakyRELU(self.conv6_1(x))
-        # x = self.leakyRELU(self.conv6_2(x))
+        x = self.leakyRELU(self.conv6_1(x))
+        x = self.leakyRELU(self.conv6_2(x))
+
+
+        ## Linear layers
+        flat = nn.Flatten(start_dim=0)
+        x = self.leakyRELU(self.linear1(flat(x)))
+        
+        x = self.leakyRELU(self.linear2(x))
+
+        x = x.view(-1, 7, 7, 30)
         
         return x
         
         
 
 
-sample = torch.randn(3, 454, 454)
+sample = torch.randn(3, 448, 448)
 
 
 model = yolo()
